@@ -1,0 +1,21 @@
+{
+    "id": "chatcmpl-7iIRvhJkCJ1ld8WRUcJF2u77VQhk7",
+    "object": "chat.completion",
+    "created": 1690791707,
+    "model": "gpt-3.5-turbo-0613",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "Merhaba! Size nas\u0131l yard\u0131mc\u0131 olabilirim?"
+            },
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 10,
+        "completion_tokens": 15,
+        "total_tokens": 25
+    }
+}

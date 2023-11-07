@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+flask # port üzerinden haberleşme için
+flask_cors
+openai
+Flask==2.0.1
+Flask-Cors==3.0.10

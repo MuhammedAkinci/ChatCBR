@@ -1,0 +1,6 @@
+docker build -t mamiakn/chatcbr2:v2 .
+
+docker run -p 8080:8080 -e ENVIRONMENT=development --rm mamiakn/chatcbr2:v2
+
+docker run -p 80:8000 -e ENVIRONMENT=production --rm -d mamiakn/chatcbr:v1
+

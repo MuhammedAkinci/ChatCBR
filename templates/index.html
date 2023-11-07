@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChatCBR</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      grid-template-rows: auto; /* Arka plan resmi otomatik olarak genişlemeli */
+      background-image: url("/static/images/chat3.png"); /* Arka plan resmi */
+      background-size: cover; /* Resmi kaplayacak şekilde ayarla */
+      background-repeat: no-repeat; /* Resmin tekrarını engelle */
+      background-attachment: fixed; /* Resmi sabit tut */
+      min-height: 100vh;
+    }
+
+    .my-container {
+      background-color: #1f4051;
+      color: white;
+      padding: 20px;
+      border: 1px solid #ccc;
+      top: 0px;
+      left: 0px;
+      cursor: pointer;
+      overflow-y: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-container {
+      background-image: url("/static/images/chat3.png");
+      background-color: cover;
+      padding: 20px;
+      border: 1px solid #ccc;
+      position: relative;
+      top: 0px;
+      right: 0px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chat-history {
+      background-image: url("/static/images/chat3.png");
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      margin-bottom: 70px; /* User-input ile son mesajlar arasındaki boşluk */
+    }
+
+    .user-question,
+    .answer-frame,
+    .previous-question {
+      max-width: 70%;
+      word-wrap: break-word;
+      box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+      white-space: normal;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .user-question img,
+    .answer-frame img {
+      margin-right: 10px;
+      max-width: 20px;
+    }
+
+    .user-question {
+      align-self: flex-end;
+      background-color: #0b8395;
+      color: white;
+      margin-top: 20px;
+    }
+
+    .answer-frame {
+      align-self: flex-start;
+      background-color: #38668f;
+      color: black;
+    }
+
+    .previous-question {
+      align-self: flex-start;
+      background-color: #2415cd;
+      color: white;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .active-question {
+      background-color: #055a82;
+    }
+
+    .user-input-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #1f4051; /* Sayfanın arka plan rengine uygun bir renk seçin */
+      padding: 15px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-input {
+      width: 300px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 50px;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .question-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 5px;
+    }
+
+    .submit-btn {
+      background-color: #222222;
+      color: #ffffff;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .typing-dots {
+      display: flex;
+      align-items: center;
+  }
+
+    .typing-dots span {
+      width: 8px;
+      height: 8px;
+      background-color: white;
+      border-radius: 50%;
+      margin-right: 4px; /* Çizgiler arası boşluk */
+      animation: typing 1s infinite; /* Yazılma animasyonu */
+    }
+
+    @keyframes typing {
+      0%, 50%, 100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    25% {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+  }
+
+  </style>
+</head>
+<body>
+  <div class="my-container">
+    <img src="{{ logo_image }}" class="logo-image" alt="Logo">
+    <div>
+      <button id="new-chat-btn" class="chat-btn" onclick="startNewChat()"><i class="fas fa-plus"></i> Yeni Sohbet</button>
+      <button class="remove-btn" onclick="removeQuestions()">Sil</button>
+    </div>
+    <p>Önceki Sorular</p>
+    <div id="previous-questions">
+      <!-- Önceki sorular burada listelenecek -->
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-history" id="chat-history">
+      <!-- Sohbet geçmişi burada görüntülenecek -->
+    </div>
+  </div>
+
+  <div class="user-input-container">
+    <div class="user-input">
+      <input type="text" id="question" class="question-input" placeholder="Sorunuzu yazın..." oninput="inputChange()" onkeypress="enterKontrolEt(event)">
+      <button class="submit-btn chat-btn" id="submit-btn" onclick="mesajGonder()"><i class="fas fa-check"></i></button>
+    </div>
+  </div>
+
+  <script>
+    var previousQuestions = [];
+    var activeQuestion = null;
+
+    async function mesajGonder() {
+      var soru = document.getElementById("question").value;
+      document.getElementById("question").value = "";
+
+      if (activeQuestion) {
+        previousQuestions.push(activeQuestion);
+      }
+
+      var chatGecmisi = document.querySelector(".chat-history");
+
+      var userQuestion = document.createElement("div");
+      userQuestion.className = "user-question";
+      userQuestion.innerHTML = `${soru}`;
+      chatGecmisi.appendChild(userQuestion);
+
+      var cevapFrame = document.createElement("div");
+      cevapFrame.className = "answer-frame waiting";
+      chatGecmisi.appendChild(cevapFrame);
+
+      var typingDots = document.createElement("div");
+      typingDots.className = "typing-dots";
+      typingDots.innerHTML = `<span></span><span></span><span></span>`;
+      cevapFrame.appendChild(typingDots);
+
+      var cevap = await fetch("{{ server_address }}/api/sor?soru=" + encodeURIComponent(soru));
+      var cevapVerisi = await cevap.json();
+
+      cevapFrame.innerHTML = `${cevapVerisi.cevap}`;
+      cevapFrame.classList.remove("waiting");
+
+      activeQuestion = {
+        question: soru,
+        answer: cevapVerisi.cevap
+      };
+
+      localStorage.setItem("activeQuestion", JSON.stringify(activeQuestion));
+    }
+
+    function inputChange() {
+      var questionInput = document.getElementById("question");
+      var submitBtn = document.getElementById("submit-btn");
+
+      if (questionInput.value.trim() !== "") {
+        submitBtn.style.color = "#085eb5";
+      } else {
+        submitBtn.style.color = "#f5f5f5";
+      }
+    }
+
+    function enterKontrolEt(event) {
+      if (event.keyCode === 13) {
+        mesajGonder();
+      }
+    }
+
+    function startNewChat() {
+      if (activeQuestion) {
+        previousQuestions.push(activeQuestion);
+        localStorage.setItem("previousQuestions", JSON.stringify(previousQuestions));
+        activeQuestion = null;
+        localStorage.removeItem("activeQuestion");
+      }
+
+      location.reload();
+    }
+
+    function removeQuestions() {
+      previousQuestions = [];
+      localStorage.removeItem("previousQuestions");
+      var previousQuestionsDiv = document.getElementById("previous-questions");
+      previousQuestionsDiv.innerHTML = "";
+    }
+
+    window.onload = function() {
+      var storedPreviousQuestions = localStorage.getItem("previousQuestions");
+      if (storedPreviousQuestions) {
+        previousQuestions = JSON.parse(storedPreviousQuestions);
+        var previousQuestionsDiv = document.getElementById("previous-questions");
+
+        previousQuestions.forEach(function(question, index) {
+          var previousQuestionDiv = document.createElement("div");
+          previousQuestionDiv.className = "previous-question";
+          previousQuestionDiv.style.backgroundColor = "#0c3346";
+          previousQuestionDiv.innerHTML = `<i class="fas fa-comment"></i> ${question.question}`;
+          previousQuestionDiv.onclick = function() {
+            previousQuestionClicked(index);
+          };
+          previousQuestionsDiv.appendChild(previousQuestionDiv);
+        });
+      }
+
+      var storedActiveQuestion = localStorage.getItem("activeQuestion");
+      if (storedActiveQuestion) {
+        activeQuestion = JSON.parse(storedActiveQuestion);
+      }
+    };
+
+    function previousQuestionClicked(questionIndex) {
+      var chatGecmisi = document.querySelector(".chat-history");
+      chatGecmisi.innerHTML = "";
+
+      var previousQuestion = previousQuestions[questionIndex];
+      var userQuestion = document.createElement("div");
+      userQuestion.className = "user-question";
+      userQuestion.innerHTML = `${previousQuestion.question}`;
+      chatGecmisi.appendChild(userQuestion);
+
+      var cevapFrame = document.createElement("div");
+      cevapFrame.className = "answer-frame";
+      cevapFrame.innerHTML = `${previousQuestion.answer}`;
+      chatGecmisi.appendChild(cevapFrame);
+
+      var activeQuestions = document.querySelectorAll(".previous-question");
+      activeQuestions.forEach(function (questionDiv) {
+      questionDiv.classList.remove("active-question");
+    });
+      activeQuestions[questionIndex].classList.add("active-question");
+  }
+  
+  </script>
+</body>
+</html>
