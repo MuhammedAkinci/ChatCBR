@@ -1,7 +1,5 @@
-requests
-beautifulsoup4
-flask # port üzerinden haberleşme için
-flask_cors
-openai
-Flask==2.0.1
-Flask-Cors==3.0.10
+requests        # HTTP isteği yollamak için
+beautifulsoup4  # HTML veriyi okumak için
+flask           # Web uygulaması geliştirme framework'ü
+flask_cors      # CORS ayarlarını yapmak için
+openai==0.28    # ChatGPT'yi kodla kullanmak için
