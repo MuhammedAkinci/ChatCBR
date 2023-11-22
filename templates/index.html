@@ -225,7 +225,7 @@
       typingDots.innerHTML = `<span></span><span></span><span></span>`;
       cevapFrame.appendChild(typingDots);
 
-      var cevap = await fetch("{{ server_address }}/api/sor?soru=" + encodeURIComponent(soru));
+      var cevap = await fetch(`${window.location.protocol}//${window.location.host}/api/sor?soru=` + encodeURIComponent(soru));
       var cevapVerisi = await cevap.json();
 
       cevapFrame.innerHTML = `${cevapVerisi.cevap}`;

@@ -10,15 +10,9 @@ CORS(app)
 
 @app.route('/')
 def frontendIndex():
-    if env == "development":
-        server_address = "http://localhost:8080"
-    elif env == "production":
-        server_address = "http://104.199.79.168"
-
     return render_template(
         'index.html',
         logo_image="/static/images/chatcbr3.png",
-        server_address=server_address,
         name="ChatCBR"
     )
 
